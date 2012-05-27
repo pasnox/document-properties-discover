@@ -9,18 +9,27 @@ int main( int argc, char** argv )
     QObject::connect( &app, SIGNAL( lastWindowClosed() ), &app, SLOT( quit() ) );
 
     const QString path = "/home/pasnox/Temporaire/indent_finder-1.4/test_files/mixed4";
+    const int indent = IndentDiscover::MixedIndent;
     QDir dir( path );
     const QFileInfoList files = dir.entryInfoList( QDir::Files );
     int count = 0;
     
     foreach ( const QFileInfo& fi, files ) {
-        qWarning() << fi.absoluteFilePath().toUtf8().constData();
-        IndentDiscover::guessFileProperties( fi.absoluteFilePath() );
+        if ( fi.fileName() == "README" ) {
+            continue;
+        }
+        
+        IndentDiscover::GuessedProperties properties = IndentDiscover::guessFileProperties( fi.absoluteFilePath() );
+        
+        if ( properties.indent != indent ) {
+            qWarning() << "Bad guessing" << fi.absoluteFilePath().toUtf8().constData();
+            Q_ASSERT( properties.indent == indent );
+        }
         
         count++;
         
         if ( count == 1 ) {
-            break;
+            //break;
         }
     }
     

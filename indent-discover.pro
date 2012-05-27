@@ -14,10 +14,15 @@
 ##
 ###########################################################################################
 
+XUP.QT_VERSION = Qt System (4.8.1)
+XUP.OTHERS_PLATFORM_TARGET_DEFAULT = indent-discover_debug
+
 TEMPLATE = app
 LANGUAGE = C++/Qt4
 TARGET = $$quote(indent-discover)
-CONFIG *= debug_and_release
+CONFIG *= debug
+CONFIG -= release debug_and_release
+QT *= core gui
 BUILD_PATH = ./build
 
 CONFIG(debug, debug|release) {
@@ -41,8 +46,7 @@ CONFIG(debug, debug|release) {
     RCC_DIR = $${BUILD_PATH}/release/.rcc
 }
 
+HEADERS *= src/IndentDiscover.h
+
 SOURCES *= src/main.cpp \
     src/IndentDiscover.cpp
-
-HEADERS *= src/IndentDiscover.h
-XUP.OTHERS_PLATFORM_TARGET_DEFAULT = indent-discover

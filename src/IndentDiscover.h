@@ -10,20 +10,20 @@ namespace IndentDiscover
 {
     enum Eol {
         UndefinedEol = 0x0,
-        Unix = 0x1,
-        DOS = 0x2,
-        MacOS = 0x4
+        UnixEol = 0x1,
+        DOSEol = 0x2,
+        MacOSEol = 0x4
     };
     
     enum Indent {
         UndefinedIndent = 0x0,
-        Tabs = 0x1,
-        Spaces = 0x2,
-        Mixede = Tabs | Spaces
+        TabsIndent = 0x1,
+        SpacesIndent = 0x2,
+        MixedIndent = TabsIndent | SpacesIndent
     };
     
-    static IndentDiscover::Eol defaultEol = IndentDiscover::Unix;
-    static IndentDiscover::Indent defaultIndent = IndentDiscover::Spaces;
+    static IndentDiscover::Eol defaultEol = IndentDiscover::UnixEol;
+    static IndentDiscover::Indent defaultIndent = IndentDiscover::SpacesIndent;
     static int defaultIndentWidth = 4;
     static int defaultTabWidth = 4;
     
@@ -31,6 +31,10 @@ namespace IndentDiscover
         typedef QList<GuessedProperties> List;
         
         GuessedProperties();
+        GuessedProperties( int eol, int indent, int indentWidth );
+        GuessedProperties( int eol, int indent, int tabWidth, int indentWidth );
+        
+        QString toString() const;
         
         int eol; // Eol flags
         int indent; // Indent flags
@@ -38,7 +42,7 @@ namespace IndentDiscover
         int tabWidth; // tab size in spaces
     };
     
-    GuessedProperties guessDataProperties( const QByteArray& data, const QByteArray& codec = QByteArray( "UTF-8" ) );
+    GuessedProperties guessContentProperties( const QString& content );
     GuessedProperties guessFileProperties( const QString& filePath, const QByteArray& codec = QByteArray( "UTF-8" ) );
     GuessedProperties::List guessFilesProperties( const QStringList& filePaths, const QByteArray& codec = QByteArray( "UTF-8" ) );
 };
