@@ -60,7 +60,7 @@ namespace DocumentPropertiesDiscover {
     int linesMax( const QString& key ) {
         int value = 0;
         
-        foreach ( QString k, DocumentPropertiesDiscover::lines.keys() ) {
+        foreach ( const QString& k, DocumentPropertiesDiscover::lines.keys() ) {
             if ( k.startsWith( key ) ) {
                 const int n = k.mid( key.length() ).toInt();
                 
@@ -235,7 +235,7 @@ namespace DocumentPropertiesDiscover {
         return result;
     }
     
-    DocumentPropertiesDiscover::LineInfo analyzeLineType( QString& line ) {
+    DocumentPropertiesDiscover::LineInfo analyzeLineType( const QString& line ) {
         /*
         Analyse the type of line and return (LineType, <indentation part of the line>).
 
@@ -308,7 +308,7 @@ namespace DocumentPropertiesDiscover {
         return DocumentPropertiesDiscover::LineInfo();
     }
     
-    QString analyzeLineIndentation( QString& line ) {
+    QString analyzeLineIndentation( const QString& line ) {
         const DocumentPropertiesDiscover::LineInfo previous_line_info = DocumentPropertiesDiscover::previous_line_info;
         const DocumentPropertiesDiscover::LineInfo current_line_info = DocumentPropertiesDiscover::analyzeLineType( line );
         DocumentPropertiesDiscover::previous_line_info = current_line_info;
@@ -422,6 +422,10 @@ namespace DocumentPropertiesDiscover {
     QString readContentLine( int& offset, const QString& content ) {
         const int start = offset;
         const int length = content.length();
+        
+        if ( offset == length ) {
+            return QString::null;
+        }
         
         // read chars until end of line
         for ( int i = offset; i < length; i++ ) {
