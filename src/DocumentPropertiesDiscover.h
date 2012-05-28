@@ -1,12 +1,12 @@
-#ifndef INDENTDISCOVER_H
-#define INDENTDISCOVER_H
+#ifndef DOCUMENTPROPERTIESDISCOVER_H
+#define DOCUMENTPROPERTIESDISCOVER_H
 
 #include <QByteArray>
 #include <QStringList>
 
 class QString;
 
-namespace IndentDiscover
+namespace DocumentPropertiesDiscover
 {
     enum Eol {
         UndefinedEol = 0x0,
@@ -22,8 +22,8 @@ namespace IndentDiscover
         MixedIndent = TabsIndent | SpacesIndent
     };
     
-    static IndentDiscover::Eol defaultEol = IndentDiscover::UnixEol;
-    static IndentDiscover::Indent defaultIndent = IndentDiscover::SpacesIndent;
+    static DocumentPropertiesDiscover::Eol defaultEol = DocumentPropertiesDiscover::UnixEol;
+    static DocumentPropertiesDiscover::Indent defaultIndent = DocumentPropertiesDiscover::SpacesIndent;
     static int defaultIndentWidth = 4;
     static int defaultTabWidth = 4;
     
@@ -47,4 +47,4 @@ namespace IndentDiscover
     GuessedProperties::List guessFilesProperties( const QStringList& filePaths, const QByteArray& codec = QByteArray( "UTF-8" ) );
 };
 
-#endif // INDENTDISCOVER_H
+#endif // DOCUMENTPROPERTIESDISCOVER_H
