@@ -37,16 +37,16 @@ namespace DocumentPropertiesDiscover
         int tabWidth; // tab size in spaces
     };
     
-    DocumentPropertiesDiscover::Eol defaultEol();// = DocumentPropertiesDiscover::UnixEol;
+    DocumentPropertiesDiscover::Eol defaultEol();
     void setDefaultEol( DocumentPropertiesDiscover::Eol eol );
     
-    DocumentPropertiesDiscover::Indent defaultIndent();// = DocumentPropertiesDiscover::SpacesIndent;
+    DocumentPropertiesDiscover::Indent defaultIndent();
     void setDefaultIndent( DocumentPropertiesDiscover::Indent indent );
     
-    int defaultIndentWidth(); // = 4;
+    int defaultIndentWidth();
     void setDefaultIndentWidth( int indentWidth );
     
-    int defaultTabWidth(); // = 4;
+    int defaultTabWidth();
     void setDefaultTabWidth( int tabWidth );
     
     GuessedProperties guessContentProperties( const QString& content );
