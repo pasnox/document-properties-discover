@@ -15,12 +15,12 @@
 ###########################################################################################
 
 XUP.QT_VERSION = Qt System (4.8.1)
-XUP.OTHERS_PLATFORM_TARGET_DEFAULT = document-properties-discover_debug
+XUP.OTHERS_PLATFORM_TARGET_DEFAULT = bin/Linux/document-properties-discover_debug
 
 include( config.pri )
 initializeProject( app, $${BUILD_TARGET}, $${BUILD_MODE}, $${BUILD_PATH}/$${TARGET_NAME}, $${BUILD_TARGET_PATH}, "" )
 
-INCLUDEPATH *= $$getFolders( . )
+INCLUDEPATH *= $$getFolders( "." )
 DEPENDPATH *= $${INCLUDEPATH}
 
 HEADERS *= src/DocumentPropertiesDiscover.h
