@@ -40,8 +40,13 @@ namespace DocumentPropertiesDiscover {
     };
     
     DocumentPropertiesDiscover::GuessedProperties defaultGuessedProperties( int eol ) {
-        return DocumentPropertiesDiscover::GuessedProperties( eol, DocumentPropertiesDiscover::defaultIndent, DocumentPropertiesDiscover::defaultIndentWidth, DocumentPropertiesDiscover::defaultTabWidth );
+        return DocumentPropertiesDiscover::GuessedProperties( eol, DocumentPropertiesDiscover::defaultIndent(), DocumentPropertiesDiscover::defaultIndentWidth(), DocumentPropertiesDiscover::defaultTabWidth() );
     }
+    
+    DocumentPropertiesDiscover::Eol _defaultEol = DocumentPropertiesDiscover::UnixEol;
+    DocumentPropertiesDiscover::Indent _defaultIndent = DocumentPropertiesDiscover::SpacesIndent;
+    int _defaultIndentWidth = 4;
+    int _defaultTabWidth = 4;
     
     QHash<QString, int> lines;
     QHash<DocumentPropertiesDiscover::Eol, int> eols;
@@ -82,7 +87,7 @@ namespace DocumentPropertiesDiscover {
         }
         
         if ( eol == DocumentPropertiesDiscover::UndefinedEol ) {
-            eol = DocumentPropertiesDiscover::defaultEol;
+            eol = DocumentPropertiesDiscover::defaultEol();
         }
         
         return eol;
@@ -178,7 +183,7 @@ namespace DocumentPropertiesDiscover {
         }
         // Detect tab files
         else if ( max_line_tab > max_line_mixed && max_line_tab > max_line_space ) {
-            result = DocumentPropertiesDiscover::GuessedProperties( DocumentPropertiesDiscover::eolMax(), DocumentPropertiesDiscover::TabsIndent, DocumentPropertiesDiscover::defaultIndentWidth, DocumentPropertiesDiscover::defaultTabWidth );
+            result = DocumentPropertiesDiscover::GuessedProperties( DocumentPropertiesDiscover::eolMax(), DocumentPropertiesDiscover::TabsIndent, DocumentPropertiesDiscover::defaultIndentWidth(), DocumentPropertiesDiscover::defaultTabWidth() );
         }
         // Detect mixed files
         else if ( max_line_mixed >= max_line_tab && max_line_mixed > max_line_space ) {
@@ -470,12 +475,14 @@ namespace DocumentPropertiesDiscover {
     }
 }
 
+// GuessedProperties
+
 DocumentPropertiesDiscover::GuessedProperties::GuessedProperties()
 {
-    eol = DocumentPropertiesDiscover::defaultEol;
-    indent = DocumentPropertiesDiscover::defaultIndent;
-    indentWidth = DocumentPropertiesDiscover::defaultIndentWidth;
-    tabWidth = DocumentPropertiesDiscover::defaultTabWidth;
+    eol = DocumentPropertiesDiscover::defaultEol();
+    indent = DocumentPropertiesDiscover::defaultIndent();
+    indentWidth = DocumentPropertiesDiscover::defaultIndentWidth();
+    tabWidth = DocumentPropertiesDiscover::defaultTabWidth();
 }
 
 DocumentPropertiesDiscover::GuessedProperties::GuessedProperties( int _eol, int _indent, int _indentWidth )
@@ -483,7 +490,7 @@ DocumentPropertiesDiscover::GuessedProperties::GuessedProperties( int _eol, int 
     eol = _eol;
     indent = _indent;
     indentWidth = _indentWidth;
-    tabWidth = DocumentPropertiesDiscover::defaultTabWidth;
+    tabWidth = DocumentPropertiesDiscover::defaultTabWidth();
 }
 
 DocumentPropertiesDiscover::GuessedProperties::GuessedProperties( int _eol, int _indent, int _indentWidth, int _tabWidth )
@@ -506,6 +513,48 @@ QString DocumentPropertiesDiscover::GuessedProperties::toString() const {
             Q_ASSERT( 0 );
             return QString( "%1: tab %2 space %3 - Eol: %4" ).arg( indent ).arg( tabWidth ).arg( indentWidth ).arg( eol );
     }
+}
+
+// DocumentPropertiesDiscover
+
+DocumentPropertiesDiscover::Eol DocumentPropertiesDiscover::defaultEol()
+{
+    return DocumentPropertiesDiscover::_defaultEol;
+}
+
+void DocumentPropertiesDiscover::setDefaultEol( DocumentPropertiesDiscover::Eol eol )
+{
+    DocumentPropertiesDiscover::_defaultEol = eol;
+}
+
+DocumentPropertiesDiscover::Indent DocumentPropertiesDiscover::defaultIndent()
+{
+    return DocumentPropertiesDiscover::_defaultIndent;
+}
+
+void DocumentPropertiesDiscover::setDefaultIndent( DocumentPropertiesDiscover::Indent indent )
+{
+    DocumentPropertiesDiscover::_defaultIndent = indent;
+}
+
+int DocumentPropertiesDiscover::defaultIndentWidth()
+{
+    return DocumentPropertiesDiscover::_defaultIndentWidth;
+}
+
+void DocumentPropertiesDiscover::setDefaultIndentWidth( int indentWidth )
+{
+    DocumentPropertiesDiscover::_defaultIndentWidth = indentWidth;
+}
+
+int DocumentPropertiesDiscover::defaultTabWidth()
+{
+    return DocumentPropertiesDiscover::_defaultTabWidth;
+}
+
+void DocumentPropertiesDiscover::setDefaultTabWidth( int tabWidth )
+{
+    DocumentPropertiesDiscover::_defaultTabWidth = tabWidth;
 }
 
 DocumentPropertiesDiscover::GuessedProperties DocumentPropertiesDiscover::guessContentProperties( const QString& content )

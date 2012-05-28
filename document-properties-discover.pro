@@ -20,7 +20,7 @@ XUP.OTHERS_PLATFORM_TARGET_DEFAULT = bin/Linux/document-properties-discover_debu
 include( config.pri )
 initializeProject( app, $${BUILD_TARGET}, $${BUILD_MODE}, $${BUILD_PATH}/$${TARGET_NAME}, $${BUILD_TARGET_PATH}, "" )
 
-INCLUDEPATH *= $$getFolders( "." )
+INCLUDEPATH *= $$getFolders( . )
 DEPENDPATH *= $${INCLUDEPATH}
 
 HEADERS *= src/DocumentPropertiesDiscover.h

@@ -22,11 +22,6 @@ namespace DocumentPropertiesDiscover
         MixedIndent = TabsIndent | SpacesIndent
     };
     
-    static DocumentPropertiesDiscover::Eol defaultEol = DocumentPropertiesDiscover::UnixEol;
-    static DocumentPropertiesDiscover::Indent defaultIndent = DocumentPropertiesDiscover::SpacesIndent;
-    static int defaultIndentWidth = 4;
-    static int defaultTabWidth = 4;
-    
     struct GuessedProperties {
         typedef QList<GuessedProperties> List;
         
@@ -41,6 +36,18 @@ namespace DocumentPropertiesDiscover
         int indentWidth; // indent size in spaces
         int tabWidth; // tab size in spaces
     };
+    
+    DocumentPropertiesDiscover::Eol defaultEol();// = DocumentPropertiesDiscover::UnixEol;
+    void setDefaultEol( DocumentPropertiesDiscover::Eol eol );
+    
+    DocumentPropertiesDiscover::Indent defaultIndent();// = DocumentPropertiesDiscover::SpacesIndent;
+    void setDefaultIndent( DocumentPropertiesDiscover::Indent indent );
+    
+    int defaultIndentWidth(); // = 4;
+    void setDefaultIndentWidth( int indentWidth );
+    
+    int defaultTabWidth(); // = 4;
+    void setDefaultTabWidth( int tabWidth );
     
     GuessedProperties guessContentProperties( const QString& content );
     GuessedProperties guessFileProperties( const QString& filePath, const QByteArray& codec = QByteArray( "UTF-8" ) );
