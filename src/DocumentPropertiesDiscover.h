@@ -23,11 +23,13 @@ namespace DocumentPropertiesDiscover
     };
     
     struct GuessedProperties {
-        typedef QList<GuessedProperties> List;
+        typedef QList<DocumentPropertiesDiscover::GuessedProperties> List;
         
         GuessedProperties();
         GuessedProperties( int eol, int indent, int indentWidth );
         GuessedProperties( int eol, int indent, int tabWidth, int indentWidth );
+        
+        bool operator==( const DocumentPropertiesDiscover::GuessedProperties& other ) const;
         
         QString toString() const;
         
@@ -49,9 +51,11 @@ namespace DocumentPropertiesDiscover
     int defaultTabWidth();
     void setDefaultTabWidth( int tabWidth );
     
-    GuessedProperties guessContentProperties( const QString& content );
-    GuessedProperties guessFileProperties( const QString& filePath, const QByteArray& codec = QByteArray( "UTF-8" ) );
-    GuessedProperties::List guessFilesProperties( const QStringList& filePaths, const QByteArray& codec = QByteArray( "UTF-8" ) );
+    DocumentPropertiesDiscover::GuessedProperties guessContentProperties( const QString& content, bool detectEol, bool detectIndent );
+    DocumentPropertiesDiscover::GuessedProperties guessFileProperties( const QString& filePath, bool detectEol, bool detectIndent, const QByteArray& codec = QByteArray( "UTF-8" ) );
+    DocumentPropertiesDiscover::GuessedProperties::List guessFilesProperties( const QStringList& filePaths, bool detectEol, bool detectIndent, const QByteArray& codec = QByteArray( "UTF-8" ) );
+    
+    void convertContent( QString& content, const DocumentPropertiesDiscover::GuessedProperties& from, const DocumentPropertiesDiscover::GuessedProperties& to, bool convertEol, bool convertIndent );
 };
 
 #endif // DOCUMENTPROPERTIESDISCOVER_H
