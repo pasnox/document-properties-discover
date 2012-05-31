@@ -3,6 +3,8 @@
 
 #include <QByteArray>
 #include <QStringList>
+#include <QTime>
+#include <QDebug>
 
 class QString;
 
@@ -37,6 +39,25 @@ namespace DocumentPropertiesDiscover
         int indent; // Indent flags
         int indentWidth; // indent size in spaces
         int tabWidth; // tab size in spaces
+    };
+    
+    class TimeTracker : public QTime {
+    public:
+        TimeTracker( const QString& _name = QString::null ) {
+            name = _name;
+            start();
+        }
+        
+        ~TimeTracker() {
+            query();
+        }
+        
+        void query( const QString& text = QString::null ) const {
+            qWarning() << qPrintable( name ) << "Elapsed time:" << elapsed() /1000.0 << qPrintable( text );
+        }
+    
+    protected:
+        QString name;
     };
     
     DocumentPropertiesDiscover::Eol defaultEol();
