@@ -5,7 +5,6 @@
 #include <QTextCodec>
 #include <QFile>
 #include <QHash>
-#include <QDebug>
 
 #define PRINT_OUTPUT false
 
@@ -581,9 +580,11 @@ void DocumentPropertiesDiscover::setDefaultTabWidth( int tabWidth )
 
 DocumentPropertiesDiscover::GuessedProperties DocumentPropertiesDiscover::guessContentProperties( const QString& content, bool detectEol, bool detectIndent )
 {
+    TimeTracker tracker( Q_FUNC_INFO );
     DocumentPropertiesDiscover::clear();
     DocumentPropertiesDiscover::parseContent( content, detectEol, detectIndent );
-    return DocumentPropertiesDiscover::results();
+    const DocumentPropertiesDiscover::GuessedProperties properties = DocumentPropertiesDiscover::results();
+    return properties;
 }
 
 DocumentPropertiesDiscover::GuessedProperties DocumentPropertiesDiscover::guessFileProperties( const QString& filePath, bool detectEol, bool detectIndent, const QByteArray& _codec )
@@ -640,17 +641,18 @@ void DocumentPropertiesDiscover::convertContent( QString& content, const Documen
     eolString[ DocumentPropertiesDiscover::UnixEol ] = "\n";
     eolString[ DocumentPropertiesDiscover::MacOSEol ] = "\r";
     
-    const QRegExp rx( "\\r\\n|\\n|\\r" );
-    const QRegExp rx2( "\\w" );
-    const int length = content.length();
+    const QRegExp eolRx( "\\r\\n|\\n|\\r" );
+    const QRegExp nonSpaceRx( "\\S" );
     int lastPos = 0;
     int end = 0;
     int pos = 0;
     int indent = 0;
     int matchedLength;
     
-    while ( ( pos = rx.indexIn( content, pos ) ) != -1 ) {
-        matchedLength = rx.matchedLength();
+    TimeTracker tracker( Q_FUNC_INFO );
+    
+    while ( ( pos = eolRx.indexIn( content, pos ) ) != -1 ) {
+        matchedLength = eolRx.matchedLength();
         
         if ( convertEol ) {
             const QString lineEol = content.mid( pos, matchedLength );
@@ -660,23 +662,56 @@ void DocumentPropertiesDiscover::convertContent( QString& content, const Documen
                 const QString neededEol = eolString.value( to.eol );
                 content.replace( pos, matchedLength, neededEol );
                 matchedLength = neededEol.length();
-                qWarning() << "eol replaced" << eol << to.eol << " - " << lineEol.length() << neededEol.length();
             }
         }
         
         if ( convertIndent ) {
             int start = lastPos;
             end = pos;
-            indent = rx2.indexIn( content, start ) -1;
+            indent = qMin( nonSpaceRx.indexIn( content, start ), end -1 );
             
-            if ( indent > end ) {
-                indent = end -1;
-            }
-            
-            if ( start < indent && indent < pos && start != indent ) {
-                const QString s = content.mid( start, end -start +matchedLength );
+            if ( start < indent && indent < pos ) {
+                QString indentPart = content.mid( start, indent -start );
                 
-                //qWarning() << "Found indented line" << s.trimmed();
+                switch ( to.indent ) {
+                    case DocumentPropertiesDiscover::UndefinedIndent:
+                        Q_ASSERT( 0 );
+                        qFatal( "Can be there!" );
+                        return;
+                    case DocumentPropertiesDiscover::TabsIndent: {
+                        if ( from.tabWidth > to.tabWidth ) {
+                            indentPart.replace( "\t", "\t\t" );
+                        }
+                        
+                        indentPart.replace( QString( to.tabWidth, ' ' ), "\t" );
+                        /*const bool hasSpaces = indentPart.contains( " " );
+                        
+                        if ( hasSpaces ) {
+                            indentPart.remove( " " );
+                            indentPart.append( "\t" );
+                        }*/
+                        
+                        break;
+                    }
+                    case DocumentPropertiesDiscover::SpacesIndent:
+                        indentPart.replace( "\t", QString( to.tabWidth, ' ' ) );
+                        break;
+                    case DocumentPropertiesDiscover::MixedIndent:
+                        // make all space
+                        indentPart.replace( "\t", QString( to.tabWidth, ' ' ) );
+                        // replace first with tabs
+                        indentPart.replace( QString( to.tabWidth, ' ' ), "\t" );
+                        break;
+                }
+                
+                //qWarning() << content.mid( start, end -start );
+                
+                // fix indent
+                content.replace( start, indent -start, indentPart );
+                // update pos
+                pos = pos -( indent -start ) +indentPart.length();
+                /*const QString s = content.mid( start, end -start +matchedLength );
+                qWarning() << "Found indented line" << s;*/
             }
             else {
                 //qWarning() << "skip line with no indent";
