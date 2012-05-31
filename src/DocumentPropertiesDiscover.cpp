@@ -380,15 +380,7 @@ namespace DocumentPropertiesDiscover {
         return QString::null;
     }
     
-    QString analyzeLine( QString& line ) {
-        if ( line.endsWith( "\n" ) ) {
-            line.chop( 1 );
-        }
-        
-        if ( line.endsWith( "\r" ) ) {
-            line.chop( 1 );
-        }
-        
+    QString analyzeLine( const QString& line ) {
         DocumentPropertiesDiscover::nb_processed_lines++;
         const bool skip_current_line = DocumentPropertiesDiscover::skip_next_line;
         DocumentPropertiesDiscover::skip_next_line = false;
@@ -411,12 +403,25 @@ namespace DocumentPropertiesDiscover {
         return key;
     }
     
-    QString readContentLine( int& offset, const QString& content, bool detectEol ) {
-        const int start = offset;
+    int eolLength( const DocumentPropertiesDiscover::Eol eol ) {
+        switch ( eol ) {
+            case DocumentPropertiesDiscover::UnixEol:
+                return 1;
+            case DocumentPropertiesDiscover::MacOSEol:
+                return 1;
+            case DocumentPropertiesDiscover::DOSEol:
+                return 2;
+            default:
+                return 0;
+        }
+    }
+    
+    DocumentPropertiesDiscover::Eol getNextEolOffset( const QString& content, int& offset, bool incrementEol ) {
         const int length = content.length();
+        DocumentPropertiesDiscover::Eol eol = DocumentPropertiesDiscover::UndefinedEol;
         
         if ( offset == length ) {
-            return QString::null;
+            return eol;
         }
         
         // read chars until end of line
@@ -428,60 +433,59 @@ namespace DocumentPropertiesDiscover {
                 case '\r':
                     // chars after
                     if ( i < length -1 -1 ) {
-                        // dos eol
-                        if ( content[ i +1 ] == '\n' ) {
-                            i++; // we read one more char
-                            if ( detectEol ) {
-                                DocumentPropertiesDiscover::eols[ DocumentPropertiesDiscover::DOSEol ]++;
-                            }
+                        if ( incrementEol ) {
+                            i++;
                         }
-                        // macos eol
-                        else {
-                            if ( detectEol ) {
-                                DocumentPropertiesDiscover::eols[ DocumentPropertiesDiscover::MacOSEol ]++;
-                            }
-                        }
+                        
+                        // dos / mac os eol
+                        eol = content[ i +1 ] == '\n' ? DocumentPropertiesDiscover::DOSEol : DocumentPropertiesDiscover::MacOSEol;
                     }
                     // ending char, macos eol
                     else {
-                        if ( detectEol ) {
-                            DocumentPropertiesDiscover::eols[ DocumentPropertiesDiscover::MacOSEol ]++;
-                        }
+                        eol = DocumentPropertiesDiscover::MacOSEol;
                     }
                     break;
                 // unix eol
                 case '\n':
-                    if ( detectEol ) {
-                        DocumentPropertiesDiscover::eols[ DocumentPropertiesDiscover::UnixEol ]++;
-                    }
+                    eol = DocumentPropertiesDiscover::UnixEol;
                     break;
                 // continue to read
                 default:
                     continue;
             }
             
-            offset = i +1; // +1 to take eol
+            offset = i;
+            
+            if ( incrementEol ) {
+                offset++;
+            }
+            
             break;
         }
         
-        return content.mid( start, offset -start );
+        return eol;
     }
     
     void parseContent( const QString& content, bool detectEol, bool detectIndent ) {
-        int offset = 0;
-        
         if ( !detectEol && !detectIndent ) {
             return;
         }
         
-        QString line = DocumentPropertiesDiscover::readContentLine( offset, content, detectEol );
+        int lastOffset = 0;
+        int offset = 0;
+        DocumentPropertiesDiscover::Eol eol = DocumentPropertiesDiscover::getNextEolOffset( content, offset, true );
         
-        while( !line.isNull() ) {
-            if ( detectIndent ) {
-                analyzeLine( line );
+        while( eol != DocumentPropertiesDiscover::UndefinedEol ) {
+            if ( detectEol ) {
+                DocumentPropertiesDiscover::eols[ eol ]++;
             }
             
-            line = DocumentPropertiesDiscover::readContentLine( offset, content, detectEol );
+            if ( detectIndent ) {
+                analyzeLine( content.mid( lastOffset, offset -lastOffset -DocumentPropertiesDiscover::eolLength( eol ) ) );
+            }
+            
+            lastOffset = offset;
+            eol = DocumentPropertiesDiscover::getNextEolOffset( content, offset, true );
         }
     }
 }
@@ -641,42 +645,36 @@ void DocumentPropertiesDiscover::convertContent( QString& content, const Documen
     eolString[ DocumentPropertiesDiscover::UnixEol ] = "\n";
     eolString[ DocumentPropertiesDiscover::MacOSEol ] = "\r";
     
-    const QRegExp eolRx( "\\r\\n|\\n|\\r" );
-    const QRegExp nonSpaceRx( "\\S" );
-    int lastPos = 0;
-    int end = 0;
-    int pos = 0;
-    int indent = 0;
-    int matchedLength;
-    
     TimeTracker tracker( Q_FUNC_INFO );
     
-    while ( ( pos = eolRx.indexIn( content, pos ) ) != -1 ) {
-        matchedLength = eolRx.matchedLength();
+    const QRegExp nonSpaceRx( "\\S" );
+    int matchedLength;
+    int indentOffset = 0;
+    int lastOffset = 0;
+    int offset = 0;
+    DocumentPropertiesDiscover::Eol eol = DocumentPropertiesDiscover::getNextEolOffset( content, offset, false );
+    
+    while( eol != DocumentPropertiesDiscover::UndefinedEol ) {
+        matchedLength = eolString[ eol ].length();
         
         if ( convertEol ) {
-            const QString lineEol = content.mid( pos, matchedLength );
-            const int eol = stringEol.value( lineEol );
-            
             if ( eol != to.eol ) {
-                const QString neededEol = eolString.value( to.eol );
-                content.replace( pos, matchedLength, neededEol );
+                const QString neededEol = eolString[ to.eol ];
+                content.replace( offset, matchedLength, neededEol );
                 matchedLength = neededEol.length();
             }
         }
         
         if ( convertIndent ) {
-            int start = lastPos;
-            end = pos;
-            indent = qMin( nonSpaceRx.indexIn( content, start ), end -1 );
+            indentOffset = qMin( nonSpaceRx.indexIn( content, lastOffset ), offset -1 );
             
-            if ( start < indent && indent < pos ) {
-                QString indentPart = content.mid( start, indent -start );
+            if ( lastOffset < indentOffset && indentOffset < offset ) {
+                QString indentPart = content.mid( lastOffset, indentOffset -lastOffset );
                 
                 switch ( to.indent ) {
                     case DocumentPropertiesDiscover::UndefinedIndent:
                         Q_ASSERT( 0 );
-                        qFatal( "Can be there!" );
+                        qFatal( "Can't be there!" );
                         return;
                     case DocumentPropertiesDiscover::TabsIndent: {
                         if ( from.tabWidth > to.tabWidth ) {
@@ -704,22 +702,21 @@ void DocumentPropertiesDiscover::convertContent( QString& content, const Documen
                         break;
                 }
                 
-                //qWarning() << content.mid( start, end -start );
-                
-                // fix indent
-                content.replace( start, indent -start, indentPart );
-                // update pos
-                pos = pos -( indent -start ) +indentPart.length();
-                /*const QString s = content.mid( start, end -start +matchedLength );
-                qWarning() << "Found indented line" << s;*/
+                // update indent string
+                content.replace( lastOffset, indentOffset -lastOffset, indentPart );
+                // update offset
+                offset = offset -( indentOffset -lastOffset ) +indentPart.length();
             }
             else {
                 //qWarning() << "skip line with no indent";
             }
             
-            lastPos = pos +matchedLength;
+            lastOffset = offset +matchedLength;
         }
         
-        pos += matchedLength;
+        offset += matchedLength;
+        
+        //lastOffset = offset;
+        eol = DocumentPropertiesDiscover::getNextEolOffset( content, offset, false );
     }
 }
