@@ -6,6 +6,13 @@
 #include <QFile>
 #include <QHash>
 
+DocumentPropertiesDiscover::GuessedProperties DocumentPropertiesDiscover::GuessedProperties::null(
+    DocumentPropertiesDiscover::UndefinedEol,
+    DocumentPropertiesDiscover::UndefinedIndent,
+    -1,
+    -1
+);
+
 #define PRINT_OUTPUT false
 
 namespace DocumentPropertiesDiscover {
@@ -567,6 +574,11 @@ bool DocumentPropertiesDiscover::GuessedProperties::operator==( const DocumentPr
         indentWidth == other.indentWidth &&
         tabWidth == other.tabWidth
     ;
+}
+
+bool DocumentPropertiesDiscover::GuessedProperties::operator!=( const DocumentPropertiesDiscover::GuessedProperties& other ) const
+{
+    return !operator==( other );
 }
 
 QString DocumentPropertiesDiscover::GuessedProperties::toString() const {

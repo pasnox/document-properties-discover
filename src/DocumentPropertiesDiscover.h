@@ -32,8 +32,11 @@ namespace DocumentPropertiesDiscover
         GuessedProperties( int eol, int indent, int tabWidth, int indentWidth );
         
         bool operator==( const DocumentPropertiesDiscover::GuessedProperties& other ) const;
+        bool operator!=( const DocumentPropertiesDiscover::GuessedProperties& other ) const;
         
         QString toString() const;
+        
+        static DocumentPropertiesDiscover::GuessedProperties null;
         
         int eol; // Eol flags
         int indent; // Indent flags
