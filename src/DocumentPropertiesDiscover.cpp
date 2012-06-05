@@ -684,9 +684,9 @@ void DocumentPropertiesDiscover::convertContent( QString& content, const Documen
         return;
     }
     
-    if ( from == to ) {
+    /*if ( from == to ) {
         return;
-    }
+    }*/
     
     const QString neededEol = DocumentPropertiesDiscover::eolString( DocumentPropertiesDiscover::Eol( to.eol ) );
     int eolLength;
