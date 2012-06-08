@@ -49,14 +49,15 @@ namespace DocumentPropertiesDiscover
         TimeTracker( const QString& _name = QString::null ) {
             name = _name;
             start();
+            query( "ctor" );
         }
         
         ~TimeTracker() {
-            query();
+            query( "dtor" );
         }
         
         void query( const QString& text = QString::null ) const {
-            qWarning() << qPrintable( name ) << "Elapsed time:" << elapsed() /1000.0 << qPrintable( text );
+            qWarning() << qPrintable( name ) << "Elapsed time:" << ( elapsed() /1000.0 ) << qPrintable( text );
         }
     
     protected:
@@ -81,5 +82,7 @@ namespace DocumentPropertiesDiscover
     
     void convertContent( QString& content, const DocumentPropertiesDiscover::GuessedProperties& from, const DocumentPropertiesDiscover::GuessedProperties& to, bool convertEol, bool convertIndent );
 };
+
+Q_DECLARE_METATYPE( DocumentPropertiesDiscover::GuessedProperties )
 
 #endif // DOCUMENTPROPERTIESDISCOVER_H
