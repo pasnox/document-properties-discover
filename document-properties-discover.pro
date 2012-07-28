@@ -1,7 +1,7 @@
 ###########################################################################################
 ##      Created using Monkey Studio IDE v1.9.0.1 (1.9.0.1)
 ##
-##  Author    : You Name <your@email.org>
+##  Author    : Filipe Azevedo aka Nox P@sNox <pasnox@gmail.com>
 ##  Project   : document-properties-discover
 ##  FileName  : document-properties-discover.pro
 ##  Date      : 2012-05-27T13:18:50
