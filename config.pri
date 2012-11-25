@@ -1,13 +1,10 @@
 # shared configuration file
 
 # include qmake-extensions
-include( qmake-extensions.pri )
+include( qmake-extensions.git/qmake-extensions.pri )
 
 BUILD_TARGET = document-properties-discover
-BUILD_RAMDISK = /media/ramdisk
-exists( $${BUILD_RAMDISK} ):BUILD_PATH = $${BUILD_RAMDISK}/build
-else:BUILD_PATH = build
-BUILD_PATH = $${BUILD_PATH}/$${BUILD_TARGET}
+BUILD_PATH = build/$${BUILD_TARGET}
 BUILD_TARGET_PATH = bin/$${Q_TARGET}
 BUILD_MODE = debug
 BUILD_TYPE = shared
