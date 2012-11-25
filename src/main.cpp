@@ -18,7 +18,7 @@ int main( int argc, char** argv )
             continue;
         }
         
-        DocumentPropertiesDiscover::GuessedProperties properties = DocumentPropertiesDiscover::guessFileProperties( fi.absoluteFilePath() );
+        DocumentPropertiesDiscover::GuessedProperties properties = DocumentPropertiesDiscover::guessFileProperties( fi.absoluteFilePath(), true, true );
         
         qWarning() << qPrintable( fi.fileName() ) << qPrintable( properties.toString() );
         
